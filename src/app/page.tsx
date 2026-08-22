@@ -168,45 +168,7 @@ export default function WhatsAppSocioConnectPage() {
     setInputText('');
 
     // Simulate smart campus response
-    setIsTyping(true);
-    setTimeout(async () => {
-      setIsTyping(false);
-      let reply = 'Count me in! See you near the venue 👍';
-      if (activeGroup?.category === 'sports') {
-        reply = 'Got it! Slot confirmed. Remember to bring non-marking shoes ⚽🏸';
-      } else if (activeGroup?.category === 'mentor') {
-        reply = 'Great question! In FFCS, prioritize morning slots and faculty quiz grading. Ping me anytime!';
-      } else if (activeGroup?.category === 'hackathon') {
-        reply = 'Awesome! I will push the initial GitHub repo link shortly 🚀';
-      }
-
-      const botMsg: FirestoreMessage = {
-        sender: 'them',
-        senderName: activeGroup?.category === 'mentor' ? 'Senior Ranker' : 'Campus Buddy',
-        text: reply,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'read',
-        createdAt: serverTimestamp()
-      };
-
-      if (isFirebaseConfigured) {
-        try {
-          await addDoc(collection(db, 'groups', activeGroupId, 'messages'), botMsg);
-          await setDoc(doc(db, 'groups', activeGroupId), {
-            lastMessage: reply,
-            lastMessageTime: botMsg.timestamp
-          }, { merge: true });
-        } catch (e) {}
-      } else {
-        setMessages(prev => [...prev, { ...botMsg, id: String(Date.now() + 1) }]);
-        setGroups(prev => prev.map(g => g.id === activeGroupId ? {
-          ...g,
-          lastMessage: reply,
-          lastMessageTime: botMsg.timestamp
-        } : g));
-      }
-    }, 1100);
-  };
+   
 
   // Handle Create Group in Firestore
   const handleCreateGroup = async (e: React.FormEvent) => {
