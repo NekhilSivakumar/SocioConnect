@@ -166,7 +166,7 @@ export default function WhatsAppSocioConnectPage() {
     }
 
     setInputText('');
-
+  };
     // Simulate smart campus response
    
 
