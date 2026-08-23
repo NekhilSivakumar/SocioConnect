@@ -25,6 +25,7 @@ import {
   Database,
   Trash2,
   ArrowRight,
+  ArrowLeft,
   User,
   LogOut,
   Lock,
@@ -88,7 +89,7 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-blue-950 relative overflow-hidden">
+    <div className="h-[100dvh] w-screen flex items-center justify-center bg-blue-950 relative overflow-hidden">
       {/* Animated background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -526,7 +527,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   });
 
   return (
-    <div className="h-screen w-screen bg-blue-950 text-slate-100 flex flex-col overflow-hidden font-sans select-none">
+    <div className="h-[100dvh] w-screen bg-blue-950 text-slate-100 flex flex-col overflow-hidden font-sans select-none">
 
       {/* Dynamic Toast */}
       <AnimatePresence>
@@ -549,7 +550,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
         {/* ═══════════════════════════════════════════════ */}
         {/* LEFT SIDEBAR */}
         {/* ═══════════════════════════════════════════════ */}
-        <aside className="w-full md:w-[370px] lg:w-[400px] h-full flex flex-col border-r border-blue-900/50 bg-slate-950 shrink-0">
+        <aside className={`${activeGroupId ? 'hidden' : 'flex'} md:flex w-full md:w-[370px] lg:w-[400px] h-full flex-col border-r border-blue-900/50 bg-slate-950 shrink-0`}>
 
           {/* Top User Bar */}
           <div className="h-16 px-4 border-b border-blue-800/60 flex items-center justify-between bg-blue-800">
@@ -716,23 +717,31 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
         {/* ═══════════════════════════════════════════════ */}
         {/* CENTER: CHAT WINDOW */}
         {/* ═══════════════════════════════════════════════ */}
-        <section className="flex-1 flex flex-col h-full bg-slate-950 relative">
+        <section className={`${activeGroupId ? 'flex' : 'hidden'} md:flex flex-1 flex-col h-full bg-slate-950 relative`}>
 
           {activeGroup ? (
             <>
               {/* Header */}
-              <header className="h-16 px-4 md:px-6 border-b border-slate-800 bg-slate-900/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-xs z-10">
-                <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowInfoSidebar(!showInfoSidebar)}>
-                  <div className="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shadow-xs">
-                    {activeGroup.avatar}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-100 tracking-tight">{activeGroup.name}</h3>
-                    <p className="text-[11px] text-blue-400 font-medium">{activeGroup.membersCount} members</p>
+              <header className="h-16 px-3 md:px-6 border-b border-slate-800 bg-slate-900/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-xs z-10">
+                <div className="flex items-center gap-1 min-w-0">
+                  <button
+                    onClick={() => setActiveGroupId(null)}
+                    className="md:hidden p-2 -ml-1 rounded-xl hover:bg-slate-800 text-slate-300 shrink-0 cursor-pointer"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => setShowInfoSidebar(!showInfoSidebar)}>
+                    <div className="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl shadow-xs shrink-0">
+                      {activeGroup.avatar}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-bold text-slate-100 tracking-tight truncate">{activeGroup.name}</h3>
+                      <p className="text-[11px] text-blue-400 font-medium">{activeGroup.membersCount} members</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-2 text-slate-400">
+                <div className="flex items-center gap-1 sm:gap-2 text-slate-400 shrink-0">
                   <button onClick={() => triggerToast(`Calling ${activeGroup.name}...`)} className="p-2.5 rounded-xl hover:bg-slate-800 hover:text-blue-400 transition-all cursor-pointer">
                     <Phone className="w-4 h-4" />
                   </button>
@@ -917,13 +926,22 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
         {/* ═══════════════════════════════════════════════ */}
         <AnimatePresence>
           {showInfoSidebar && activeGroup && (
-            <motion.aside
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 350, damping: 30 }}
-              className="h-full border-l border-slate-800 bg-slate-950 flex flex-col overflow-y-auto shrink-0"
-            >
+            <>
+              {/* Backdrop — mobile only, tap to dismiss */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowInfoSidebar(false)}
+                className="fixed inset-0 z-30 bg-black/60 md:hidden"
+              />
+              <motion.aside
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '100%', opacity: 0 }}
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                className="fixed inset-y-0 right-0 z-40 w-full sm:w-[340px] md:static md:z-auto md:w-[320px] h-full border-l border-slate-800 bg-slate-950 flex flex-col overflow-y-auto shrink-0"
+              >
               <div className="h-16 px-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
                 <h3 className="text-sm font-bold text-slate-100">Lobby Info</h3>
                 <button onClick={() => setShowInfoSidebar(false)} className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 cursor-pointer">
@@ -1010,6 +1028,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                 </div>
               </div>
             </motion.aside>
+            </>
           )}
         </AnimatePresence>
       </div>
@@ -1024,7 +1043,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-lg bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative"
+              className="w-full max-w-lg bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => {
@@ -1061,7 +1080,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold text-slate-300 block mb-1">Category:</label>
                     <select
@@ -1201,7 +1220,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-sm bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative"
+              className="w-full max-w-sm bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => {
@@ -1306,7 +1325,7 @@ export default function SocioConnectApp() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-blue-950">
+      <div className="h-[100dvh] w-screen flex items-center justify-center bg-blue-950">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
