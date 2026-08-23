@@ -60,23 +60,23 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-cyan-500 via-teal-500 to-blue-700 relative overflow-hidden">
+    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-teal-950 to-blue-950 relative overflow-hidden">
       {/* Animated background blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           animate={{ x: [0, 30, -20, 0], y: [0, -40, 20, 0], scale: [1, 1.1, 0.95, 1] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-blue-400/20 blur-[100px]"
+          className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-teal-500/25 blur-[100px]"
         />
         <motion.div
           animate={{ x: [0, -25, 35, 0], y: [0, 30, -25, 0], scale: [1, 0.9, 1.1, 1] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-cyan-400/20 blur-[120px]"
+          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-cyan-500/20 blur-[120px]"
         />
         <motion.div
           animate={{ x: [0, 15, -15, 0], y: [0, -20, 30, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-blue-500/15 blur-[80px]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-blue-600/20 blur-[80px]"
         />
       </div>
 
@@ -151,8 +151,8 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
               disabled={name.trim().length < 2}
               className={`w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 name.trim().length >= 2
-                  ? 'bg-white text-blue-700 shadow-lg shadow-white/20 hover:shadow-xl hover:shadow-white/30'
-                  : 'bg-white/20 text-white/50 cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-900/40 hover:shadow-xl hover:shadow-cyan-900/50'
+                  : 'bg-white/10 text-white/40 cursor-not-allowed'
               }`}
             >
               <span>Enter SocioConnect</span>
@@ -376,7 +376,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   });
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-cyan-500 via-teal-500 to-blue-700 text-slate-800 flex flex-col overflow-hidden font-sans select-none">
+    <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-teal-950 to-blue-950 text-slate-100 flex flex-col overflow-hidden font-sans select-none">
 
       {/* Dynamic Toast */}
       <AnimatePresence>
@@ -385,31 +385,31 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
             initial={{ opacity: 0, y: -30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-4 right-6 z-50 bg-gradient-to-r from-cyan-50/95 to-blue-50/95 backdrop-blur-xl text-blue-800 px-4 py-3 rounded-2xl shadow-xl border border-blue-200 flex items-center gap-2.5 text-xs font-medium"
+            className="fixed top-4 right-6 z-50 bg-gradient-to-r from-slate-800/95 to-slate-900/95 backdrop-blur-xl text-cyan-300 px-4 py-3 rounded-2xl shadow-xl border border-cyan-800/60 flex items-center gap-2.5 text-xs font-medium"
           >
-            <Sparkles className="w-4 h-4 text-blue-500" />
+            <Sparkles className="w-4 h-4 text-cyan-400" />
             <span>{toastMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Main Container with glass effect */}
-      <div className="flex-1 flex overflow-hidden m-2 sm:m-3 rounded-2xl bg-gradient-to-br from-cyan-50/95 via-white/95 to-blue-50/95 backdrop-blur-xl shadow-2xl border border-cyan-100/60">
+      <div className="flex-1 flex overflow-hidden m-2 sm:m-3 rounded-2xl bg-gradient-to-br from-slate-900/95 via-slate-950/95 to-slate-900/95 backdrop-blur-xl shadow-2xl border border-teal-900/50">
 
         {/* ═══════════════════════════════════════════════ */}
         {/* LEFT SIDEBAR */}
         {/* ═══════════════════════════════════════════════ */}
-        <aside className="w-full md:w-[370px] lg:w-[400px] h-full flex flex-col border-r border-teal-100/50 bg-gradient-to-b from-cyan-50 to-blue-100/40 shrink-0">
+        <aside className="w-full md:w-[370px] lg:w-[400px] h-full flex flex-col border-r border-teal-900/50 bg-gradient-to-b from-slate-900 to-slate-950 shrink-0">
 
           {/* Top User Bar */}
-          <div className="h-16 px-4 border-b border-teal-100/60 flex items-center justify-between bg-gradient-to-r from-cyan-600 to-blue-700">
+          <div className="h-16 px-4 border-b border-teal-800/60 flex items-center justify-between bg-gradient-to-r from-teal-700 via-cyan-700 to-blue-800">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-xs font-black text-white uppercase">
                 {userName.slice(0, 2)}
               </div>
               <div>
                 <h2 className="text-sm font-bold text-white">{userName}</h2>
-                <p className="text-[10px] text-teal-100">Online • VIT Campus</p>
+                <p className="text-[10px] text-cyan-200">Online • VIT Campus</p>
               </div>
             </div>
 
@@ -432,24 +432,24 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
           </div>
 
           {/* Search Bar */}
-          <div className="p-3 border-b border-cyan-100/40 bg-cyan-50/50">
+          <div className="p-3 border-b border-slate-800 bg-slate-900/60">
             <div className="relative flex items-center">
-              <Search className="w-4 h-4 text-teal-400 absolute left-3.5" />
+              <Search className="w-4 h-4 text-cyan-500 absolute left-3.5" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search lobbies..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-blue-50/60 border border-blue-200/50 focus:border-blue-400 focus:bg-white text-xs text-slate-800 placeholder:text-blue-400/70 focus:outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-800/60 border border-slate-700 focus:border-cyan-500 focus:bg-slate-800 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none transition-all"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-3 text-teal-400 hover:text-teal-600 text-xs">✕</button>
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 text-slate-500 hover:text-slate-300 text-xs">✕</button>
               )}
             </div>
           </div>
 
           {/* Category Filter Pills */}
-          <div className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none border-b border-cyan-100/40 bg-blue-50/40">
+          <div className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none border-b border-slate-800 bg-slate-900/40">
             {[
               { id: 'all', label: 'All Lobbies' },
               { id: 'sports', label: '⚽ Sports' },
@@ -463,13 +463,13 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                   key={tab.id}
                   onClick={() => setFilterCategory(tab.id)}
                   className={`relative px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                    isSelected ? 'text-white' : 'text-blue-700 hover:bg-blue-100/60'
+                    isSelected ? 'text-white' : 'text-slate-300 hover:bg-slate-800/60'
                   }`}
                 >
                   {isSelected && (
                     <motion.div
                       layoutId="activeFilter"
-                      className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full shadow-sm"
+                      className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full shadow-sm"
                       transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     />
                   )}
@@ -480,19 +480,19 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
           </div>
 
           {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto divide-y divide-cyan-100/30 bg-cyan-50/30">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60 bg-slate-900/20">
             {filteredGroups.length === 0 ? (
               <div className="p-8 text-center flex flex-col items-center justify-center h-full">
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-100 border border-blue-200 flex items-center justify-center text-3xl mb-3 shadow-inner">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-3xl mb-3 shadow-inner">
                   💬
                 </div>
-                <h4 className="text-sm font-bold text-slate-700">0 Active Lobbies</h4>
-                <p className="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">
+                <h4 className="text-sm font-bold text-slate-200">0 Active Lobbies</h4>
+                <p className="text-xs text-slate-400 mt-1 max-w-xs leading-relaxed">
                   Database is clean at zero. Create a lobby to get started!
                 </p>
                 <button
                   onClick={() => setShowNewGroupModal(true)}
-                  className="mt-4 px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  className="mt-4 px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 text-white text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
                 >
                   + Create First Lobby
                 </button>
@@ -504,33 +504,33 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                   <motion.div
                     key={group.id}
                     onClick={() => setActiveGroupId(group.id || null)}
-                    whileHover={{ backgroundColor: 'rgba(204, 251, 241, 0.4)' }}
+                    whileHover={{ backgroundColor: 'rgba(30, 64, 84, 0.5)' }}
                     className={`px-4 py-3 flex items-start gap-3 cursor-pointer transition-all ${
-                      isActive ? 'bg-blue-100/50 border-l-4 border-blue-500' : ''
+                      isActive ? 'bg-slate-800/70 border-l-4 border-cyan-500' : ''
                     }`}
                   >
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-100 to-blue-100 border border-blue-200/60 flex items-center justify-center text-xl shadow-xs shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-xl shadow-xs shrink-0">
                       {group.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
-                        <h3 className={`text-xs font-bold truncate ${isActive ? 'text-blue-800' : 'text-slate-800'}`}>
+                        <h3 className={`text-xs font-bold truncate ${isActive ? 'text-cyan-300' : 'text-slate-200'}`}>
                           {group.name}
                         </h3>
-                        <span className="text-[10px] text-slate-400 font-medium shrink-0 ml-2">
+                        <span className="text-[10px] text-slate-500 font-medium shrink-0 ml-2">
                           {group.lastMessageTime}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 truncate pr-2">
+                      <p className="text-[11px] text-slate-400 truncate pr-2">
                         {group.lastMessage}
                       </p>
                       <div className="mt-1 flex items-center gap-1.5">
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
                           group.category === 'sports'
-                            ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                            ? 'bg-cyan-950/60 text-cyan-300 border-cyan-800'
                             : group.category === 'mentor'
-                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                            : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                            ? 'bg-blue-950/60 text-blue-300 border-blue-800'
+                            : 'bg-indigo-950/60 text-indigo-300 border-indigo-800'
                         }`}>
                           {group.categoryLabel}
                         </span>
@@ -543,12 +543,12 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
           </div>
 
           {/* Bottom Stats */}
-          <div className="p-3 border-t border-cyan-100/50 bg-blue-50/40 flex items-center justify-between text-xs text-slate-500">
+          <div className="p-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between text-xs text-slate-400">
             <span className="text-[11px] font-medium">📊 {groups.length} Lobbies</span>
             {groups.length > 0 && (
               <button
                 onClick={handleResetToZero}
-                className="text-[11px] text-rose-500 hover:text-rose-700 font-semibold flex items-center gap-1 cursor-pointer"
+                className="text-[11px] text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Reset</span>
@@ -560,33 +560,33 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
         {/* ═══════════════════════════════════════════════ */}
         {/* CENTER: CHAT WINDOW */}
         {/* ═══════════════════════════════════════════════ */}
-        <section className="flex-1 flex flex-col h-full bg-gradient-to-b from-cyan-50/40 to-blue-50/20 relative">
+        <section className="flex-1 flex flex-col h-full bg-gradient-to-b from-slate-950 to-slate-900 relative">
 
           {activeGroup ? (
             <>
               {/* Header */}
-              <header className="h-16 px-4 md:px-6 border-b border-cyan-100/50 bg-cyan-50/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-xs z-10">
+              <header className="h-16 px-4 md:px-6 border-b border-slate-800 bg-slate-900/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-xs z-10">
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShowInfoSidebar(!showInfoSidebar)}>
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-100 to-blue-100 border border-blue-200 flex items-center justify-center text-xl shadow-xs">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-xl shadow-xs">
                     {activeGroup.avatar}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800 tracking-tight">{activeGroup.name}</h3>
-                    <p className="text-[11px] text-blue-600 font-medium">{activeGroup.membersCount} members</p>
+                    <h3 className="text-sm font-bold text-slate-100 tracking-tight">{activeGroup.name}</h3>
+                    <p className="text-[11px] text-cyan-400 font-medium">{activeGroup.membersCount} members</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-2 text-slate-500">
-                  <button onClick={() => triggerToast(`Calling ${activeGroup.name}...`)} className="p-2.5 rounded-xl hover:bg-blue-100/60 hover:text-blue-700 transition-all cursor-pointer">
+                <div className="flex items-center gap-1 sm:gap-2 text-slate-400">
+                  <button onClick={() => triggerToast(`Calling ${activeGroup.name}...`)} className="p-2.5 rounded-xl hover:bg-slate-800 hover:text-cyan-400 transition-all cursor-pointer">
                     <Phone className="w-4 h-4" />
                   </button>
-                  <button onClick={() => triggerToast(`Video call for ${activeGroup.name}...`)} className="p-2.5 rounded-xl hover:bg-blue-100/60 hover:text-blue-700 transition-all cursor-pointer">
+                  <button onClick={() => triggerToast(`Video call for ${activeGroup.name}...`)} className="p-2.5 rounded-xl hover:bg-slate-800 hover:text-cyan-400 transition-all cursor-pointer">
                     <Video className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setShowInfoSidebar(!showInfoSidebar)}
                     className={`p-2.5 rounded-xl transition-all cursor-pointer ${
-                      showInfoSidebar ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' : 'hover:bg-blue-100/60 hover:text-blue-700'
+                      showInfoSidebar ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white' : 'hover:bg-slate-800 hover:text-cyan-400'
                     }`}
                   >
                     <Info className="w-4 h-4" />
@@ -597,7 +597,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
                 <div className="flex justify-center my-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-100/60 border border-blue-200/50 text-blue-600 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-slate-800/70 border border-slate-700 text-cyan-400 shadow-xs">
                     Today • VIT Campus
                   </span>
                 </div>
@@ -612,7 +612,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                           animate={{ opacity: 1, y: 0 }}
                           className="flex justify-center my-2"
                         >
-                          <div className="max-w-md px-4 py-2 rounded-2xl bg-blue-50 border border-blue-200/50 text-center text-xs text-blue-700 shadow-xs">
+                          <div className="max-w-md px-4 py-2 rounded-2xl bg-slate-800 border border-slate-700 text-center text-xs text-cyan-300 shadow-xs">
                             {msg.text}
                           </div>
                         </motion.div>
@@ -633,13 +633,13 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                           className={`max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 shadow-sm relative ${
                             isMe
                               ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white rounded-br-none'
-                              : 'bg-blue-50/70 border border-blue-100 text-slate-800 rounded-bl-none'
+                              : 'bg-slate-800 border border-slate-700 text-slate-100 rounded-bl-none'
                           }`}
                         >
                           {/* Sender name on every message */}
                           {msg.senderName && (
                             <p className={`text-[10px] font-bold mb-1 ${
-                              isMe ? 'text-cyan-100' : 'text-blue-600'
+                              isMe ? 'text-cyan-100' : 'text-cyan-400'
                             }`}>
                               {msg.senderName}
                             </p>
@@ -649,7 +649,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                             {msg.text}
                           </p>
 
-                          <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] ${isMe ? 'text-cyan-100' : 'text-slate-400'}`}>
+                          <div className={`flex items-center justify-end gap-1 mt-1 text-[10px] ${isMe ? 'text-cyan-100' : 'text-slate-500'}`}>
                             <span>{msg.timestamp}</span>
                             {isMe && (
                               <span>
@@ -671,7 +671,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               </div>
 
               {/* Quick Chips */}
-              <div className="px-4 py-2 border-t border-cyan-100/40 bg-cyan-50/50 flex items-center gap-2 overflow-x-auto scrollbar-none">
+              <div className="px-4 py-2 border-t border-slate-800 bg-slate-900/50 flex items-center gap-2 overflow-x-auto scrollbar-none">
                 {[
                   'Count me in! ⚽',
                   'What time?',
@@ -681,7 +681,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(chip)}
-                    className="px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200/60 text-blue-700 text-[11px] font-medium whitespace-nowrap transition-all cursor-pointer"
+                    className="px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 text-[11px] font-medium whitespace-nowrap transition-all cursor-pointer"
                   >
                     {chip}
                   </button>
@@ -689,10 +689,10 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               </div>
 
               {/* Input Bar */}
-              <footer className="p-3 md:p-4 border-t border-cyan-100/50 bg-cyan-50/60 backdrop-blur-sm flex items-center gap-2 shrink-0">
+              <footer className="p-3 md:p-4 border-t border-slate-800 bg-slate-900/60 backdrop-blur-sm flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleSendMessage("👍")}
-                  className="p-2.5 rounded-xl hover:bg-blue-100/60 text-blue-500 cursor-pointer"
+                  className="p-2.5 rounded-xl hover:bg-slate-800 text-cyan-400 cursor-pointer"
                 >
                   <Smile className="w-5 h-5" />
                 </button>
@@ -706,7 +706,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder={`Message as ${userName}...`}
-                    className="flex-1 py-3 px-4 rounded-xl bg-blue-50/50 border border-blue-200/50 text-xs sm:text-sm text-slate-800 placeholder:text-blue-400/60 focus:outline-none focus:border-blue-400 focus:bg-white shadow-xs transition-all"
+                    className="flex-1 py-3 px-4 rounded-xl bg-slate-800/60 border border-slate-700 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 focus:bg-slate-800 shadow-xs transition-all"
                   />
                   {inputText.trim() ? (
                     <motion.button
@@ -721,7 +721,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                     <button
                       type="button"
                       onClick={() => handleSendMessage("🎙️ Voice note")}
-                      className="p-3 rounded-xl bg-blue-100/60 hover:bg-blue-200/60 text-blue-600 transition-all cursor-pointer"
+                      className="p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 transition-all cursor-pointer"
                     >
                       <Mic className="w-4 h-4" />
                     </button>
@@ -735,17 +735,17 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 200 }}
-                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-100 border border-blue-200 flex items-center justify-center text-4xl mb-4 shadow-sm"
+                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-4xl mb-4 shadow-sm"
               >
                 👋
               </motion.div>
-              <h3 className="text-base font-bold text-slate-700">Hey {userName}! Select or create a lobby</h3>
-              <p className="text-xs text-slate-500 max-w-sm mt-1 leading-relaxed">
+              <h3 className="text-base font-bold text-slate-200">Hey {userName}! Select or create a lobby</h3>
+              <p className="text-xs text-slate-400 max-w-sm mt-1 leading-relaxed">
                 Connect with freshers and seniors for sports, hostels, and hackathons.
               </p>
               <button
                 onClick={() => setShowNewGroupModal(true)}
-                className="mt-5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all cursor-pointer hover:shadow-lg"
+                className="mt-5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 text-white text-xs font-bold shadow-md shadow-blue-900/40 transition-all cursor-pointer hover:shadow-lg"
               >
                 + Create New Lobby
               </button>
@@ -763,38 +763,38 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               animate={{ width: 320, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 350, damping: 30 }}
-              className="h-full border-l border-cyan-100/50 bg-gradient-to-b from-cyan-50 to-blue-50 flex flex-col overflow-y-auto shrink-0"
+              className="h-full border-l border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col overflow-y-auto shrink-0"
             >
-              <div className="h-16 px-4 border-b border-cyan-100/50 flex items-center justify-between bg-blue-50/40">
-                <h3 className="text-sm font-bold text-slate-800">Lobby Info</h3>
-                <button onClick={() => setShowInfoSidebar(false)} className="p-2 rounded-xl hover:bg-blue-100/60 text-slate-500 cursor-pointer">
+              <div className="h-16 px-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+                <h3 className="text-sm font-bold text-slate-100">Lobby Info</h3>
+                <button onClick={() => setShowInfoSidebar(false)} className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 cursor-pointer">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-6 text-center border-b border-cyan-100/40">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-100 to-blue-100 border border-blue-200 mx-auto flex items-center justify-center text-4xl mb-3 shadow-sm">
+              <div className="p-6 text-center border-b border-slate-800">
+                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 mx-auto flex items-center justify-center text-4xl mb-3 shadow-sm">
                   {activeGroup.avatar}
                 </div>
-                <h4 className="text-base font-bold text-slate-800">{activeGroup.name}</h4>
-                <p className="text-xs text-blue-600 font-bold mt-0.5">{activeGroup.categoryLabel}</p>
+                <h4 className="text-base font-bold text-slate-100">{activeGroup.name}</h4>
+                <p className="text-xs text-cyan-400 font-bold mt-0.5">{activeGroup.categoryLabel}</p>
                 {activeGroup.hostelBlock && (
-                  <p className="text-[11px] text-slate-500 mt-1">📍 {activeGroup.hostelBlock}</p>
+                  <p className="text-[11px] text-slate-400 mt-1">📍 {activeGroup.hostelBlock}</p>
                 )}
               </div>
 
               <div className="p-5 space-y-5 flex-1">
                 <div>
-                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">About</h5>
-                  <p className="text-xs text-slate-700 leading-relaxed bg-blue-50/50 p-3 rounded-2xl border border-blue-100">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">About</h5>
+                  <p className="text-xs text-slate-300 leading-relaxed bg-slate-800/60 p-3 rounded-2xl border border-slate-700">
                     {activeGroup.aboutText}
                   </p>
                 </div>
 
                 <div>
-                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Campus Location</h5>
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-cyan-50 to-blue-50 border border-blue-200/50 text-xs text-blue-700 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 shrink-0 text-blue-500" />
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Campus Location</h5>
+                  <div className="p-3 rounded-2xl bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 text-xs text-cyan-300 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 shrink-0 text-cyan-400" />
                     <span>VIT Vellore Main Campus</span>
                   </div>
                 </div>
@@ -809,50 +809,50 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
       {/* ═══════════════════════════════════════════════ */}
       <AnimatePresence>
         {showNewGroupModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-lg bg-gradient-to-br from-cyan-50 to-blue-50 border border-blue-100 rounded-3xl p-6 sm:p-8 shadow-2xl relative"
+              className="w-full max-w-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative"
             >
               <button
                 onClick={() => setShowNewGroupModal(false)}
-                className="absolute top-6 right-6 p-2 rounded-xl hover:bg-blue-100/60 text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-800 text-slate-500 hover:text-slate-200 cursor-pointer"
               >
                 ✕
               </button>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-100 to-blue-100 text-blue-600">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-cyan-400">
                   <Plus className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-800">Create Campus Lobby</h3>
-                  <p className="text-xs text-slate-500">by {userName} • Saved to Firestore</p>
+                  <h3 className="text-xl font-bold text-slate-100">Create Campus Lobby</h3>
+                  <p className="text-xs text-slate-400">by {userName} • Saved to Firestore</p>
                 </div>
               </div>
 
               <form onSubmit={handleCreateGroup} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">Lobby Title:</label>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Lobby Title:</label>
                   <input
                     type="text"
                     required
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
                     placeholder="e.g. Badminton Doubles at 6 PM"
-                    className="w-full rounded-xl bg-blue-50/40 border border-blue-200/50 p-3 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white"
+                    className="w-full rounded-xl bg-slate-800/60 border border-slate-700 p-3 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 focus:bg-slate-800"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Category:</label>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Category:</label>
                     <select
                       value={newGroupCategory}
                       onChange={(e) => setNewGroupCategory(e.target.value as any)}
-                      className="w-full rounded-xl bg-blue-50/40 border border-blue-200/50 p-3 text-xs text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white"
+                      className="w-full rounded-xl bg-slate-800/60 border border-slate-700 p-3 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 focus:bg-slate-800"
                     >
                       <option value="sports">Sports Match ⚽</option>
                       <option value="mentor">Senior Mentorship 🎓</option>
@@ -861,33 +861,33 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Location:</label>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1">Location:</label>
                     <input
                       type="text"
                       value={newGroupHostel}
                       onChange={(e) => setNewGroupHostel(e.target.value)}
                       placeholder="e.g. MH-G Block"
-                      className="w-full rounded-xl bg-blue-50/40 border border-blue-200/50 p-3 text-xs text-slate-800 focus:outline-none focus:border-blue-500 focus:bg-white"
+                      className="w-full rounded-xl bg-slate-800/60 border border-slate-700 p-3 text-xs text-slate-100 focus:outline-none focus:border-cyan-500 focus:bg-slate-800"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">Description:</label>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Description:</label>
                   <textarea
                     rows={3}
                     value={newGroupDesc}
                     onChange={(e) => setNewGroupDesc(e.target.value)}
                     placeholder="Details about timings, rules, or who can join..."
-                    className="w-full rounded-xl bg-blue-50/40 border border-blue-200/50 p-3 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white"
+                    className="w-full rounded-xl bg-slate-800/60 border border-slate-700 p-3 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 focus:bg-slate-800"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-blue-100/50 mt-6">
-                  <button type="button" onClick={() => setShowNewGroupModal(false)} className="px-5 py-2.5 rounded-xl bg-slate-100 text-xs font-semibold text-slate-600 hover:bg-slate-200 cursor-pointer">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
+                  <button type="button" onClick={() => setShowNewGroupModal(false)} className="px-5 py-2.5 rounded-xl bg-slate-800 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer">
                     Cancel
                   </button>
-                  <button type="submit" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-xs font-bold text-white shadow-md shadow-blue-500/20 cursor-pointer hover:shadow-lg">
+                  <button type="submit" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 text-xs font-bold text-white shadow-md shadow-blue-900/40 cursor-pointer hover:shadow-lg">
                     Create Lobby
                   </button>
                 </div>
@@ -928,7 +928,7 @@ export default function SocioConnectApp() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-cyan-500 via-teal-500 to-blue-700">
+      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-teal-950 to-blue-950">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
