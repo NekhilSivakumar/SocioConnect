@@ -70,6 +70,16 @@ type PrivacyFields = {
 };
 type PrivateGroup = FirestoreGroup & PrivacyFields;
 
+// Normalizes a display name for identity comparisons: trims ends and
+// collapses internal double-spaces (mobile keyboards frequently insert
+// an extra space via autocomplete/autocapitalize). Case is deliberately
+// left untouched — "same name, different case" is still a different
+// person, by design. This only guards against invisible whitespace
+// differences that make the exact same name look like a mismatch.
+function normalizeName(name: string | undefined | null): string {
+  return (name || '').trim().replace(/\s+/g, ' ');
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // NAME ENTRY SPLASH PAGE
 // ─────────────────────────────────────────────────────────────────────
@@ -83,8 +93,9 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim().length >= 2) {
-      onEnter(name.trim());
+    const cleanName = name.trim().replace(/\s+/g, ' ');
+    if (cleanName.length >= 2) {
+      onEnter(cleanName);
     }
   };
 
@@ -795,10 +806,12 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                       );
                     }
 
-                    // Case-sensitive exact match: a message is "mine" only if
-                    // its senderName is identical to the current userName —
-                    // e.g. "nekhil" and "Nekhil" are treated as different people.
-                    const isMe = msg.senderName === userName;
+                    // Case-sensitive exact match (ignoring incidental
+                    // whitespace differences): a message is "mine" only if
+                    // its senderName is the same person's name as the
+                    // current userName — e.g. "nekhil" and "Nekhil" are
+                    // still treated as different people.
+                    const isMe = normalizeName(msg.senderName) === normalizeName(userName);
 
                     return (
                       <motion.div
@@ -868,31 +881,31 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               </div>
 
               {/* Input Bar */}
-              <footer className="p-3 md:p-4 border-t border-neutral-800 bg-neutral-900/60 backdrop-blur-sm flex items-center gap-2 shrink-0">
+              <footer className="p-2.5 sm:p-3 md:p-4 border-t border-neutral-800 bg-neutral-900/60 backdrop-blur-sm flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <button
                   onClick={() => handleSendMessage("👍")}
-                  className="p-2.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+                  className="p-2.5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer shrink-0"
                 >
                   <Smile className="w-5 h-5" />
                 </button>
 
                 <form
                   onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
-                  className="flex-1 flex items-center gap-2"
+                  className="flex-1 flex items-center gap-2 min-w-0"
                 >
                   <input
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     placeholder={`Message as ${userName}...`}
-                    className="flex-1 py-3 px-4 rounded-xl bg-neutral-800/60 border border-neutral-700 text-xs sm:text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-white/30 focus:bg-neutral-800 shadow-xs transition-all"
+                    className="flex-1 min-w-0 py-3 px-4 rounded-xl bg-neutral-800/60 border border-neutral-700 text-xs sm:text-sm text-neutral-100 placeholder:text-neutral-500 focus:outline-none focus:border-white/30 focus:bg-neutral-800 shadow-xs transition-all"
                   />
                   {inputText.trim() ? (
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       type="submit"
-                      className="p-3 rounded-xl bg-white text-black shadow-md shadow-white/10 transition-all cursor-pointer"
+                      className="p-3 rounded-xl bg-white text-black shadow-md shadow-white/10 transition-all cursor-pointer shrink-0"
                     >
                       <Send className="w-4 h-4" />
                     </motion.button>
@@ -900,7 +913,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                     <button
                       type="button"
                       onClick={() => handleSendMessage("🎙️ Voice note")}
-                      className="p-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white transition-all cursor-pointer"
+                      className="p-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white transition-all cursor-pointer shrink-0"
                     >
                       <Mic className="w-4 h-4" />
                     </button>
