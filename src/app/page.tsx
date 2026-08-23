@@ -70,14 +70,14 @@ type PrivacyFields = {
 };
 type PrivateGroup = FirestoreGroup & PrivacyFields;
 
-// Normalizes a display name for identity comparisons: trims ends and
+// Normalizes a display name for identity comparisons: trims ends,
 // collapses internal double-spaces (mobile keyboards frequently insert
-// an extra space via autocomplete/autocapitalize). Case is deliberately
-// left untouched — "same name, different case" is still a different
-// person, by design. This only guards against invisible whitespace
-// differences that make the exact same name look like a mismatch.
+// an extra space via autocomplete), and lowercases (phone autocapitalize
+// is inconsistent between logins — "Nekhil" one time, "nekhil" the next,
+// same person). This is comparison-only: senderName is still stored and
+// displayed with whatever casing the person actually typed.
 function normalizeName(name: string | undefined | null): string {
-  return (name || '').trim().replace(/\s+/g, ' ');
+  return (name || '').trim().replace(/\s+/g, ' ').toLowerCase();
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -806,11 +806,10 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                       );
                     }
 
-                    // Case-sensitive exact match (ignoring incidental
-                    // whitespace differences): a message is "mine" only if
-                    // its senderName is the same person's name as the
-                    // current userName — e.g. "nekhil" and "Nekhil" are
-                    // still treated as different people.
+                    // A message is "mine" if its senderName matches the
+                    // current userName, ignoring case and stray whitespace
+                    // (phone keyboards autocapitalize/autospace differently
+                    // between logins for the same person).
                     const isMe = normalizeName(msg.senderName) === normalizeName(userName);
 
                     return (
