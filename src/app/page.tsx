@@ -358,7 +358,11 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
 
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const newMsg: FirestoreMessage = {
-      sender: 'me',
+      // NOTE: this field is no longer used to decide left/right alignment —
+      // that's computed per-viewer from senderName vs. the logged-in
+      // userName (see isMe below). Kept as 'them' just to satisfy the
+      // FirestoreMessage type shape; 'system' is still used separately.
+      sender: 'them',
       senderName: userName,
       text: text.trim(),
       timestamp: currentTime,
@@ -776,7 +780,10 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                       );
                     }
 
-                    const isMe = msg.sender === 'me';
+                    // Case-sensitive exact match: a message is "mine" only if
+                    // its senderName is identical to the current userName —
+                    // e.g. "nekhil" and "Nekhil" are treated as different people.
+                    const isMe = msg.senderName === userName;
 
                     return (
                       <motion.div
