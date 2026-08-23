@@ -26,7 +26,12 @@ import {
   Trash2,
   ArrowRight,
   User,
-  LogOut
+  LogOut,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  ShieldAlert
 } from 'lucide-react';
 import { db, isFirebaseConfigured, FirestoreGroup, FirestoreMessage } from '@/lib/firebase';
 import {
@@ -41,6 +46,31 @@ import {
   deleteDoc,
   getDocs
 } from 'firebase/firestore';
+
+// ─────────────────────────────────────────────────────────────────────
+// PRIVATE LOBBY SUPPORT
+// ─────────────────────────────────────────────────────────────────────
+// NOTE: FirestoreGroup lives in '@/lib/firebase' and doesn't know about
+// these fields yet. For full type-safety, add:
+//   isPrivate?: boolean;
+//   passwordHash?: string;
+// to the FirestoreGroup interface in lib/firebase.ts. Until then this
+// local type is used wherever we read/write those two fields.
+type PrivacyFields = {
+  isPrivate?: boolean;
+  passwordHash?: string;
+};
+type PrivateGroup = FirestoreGroup & PrivacyFields;
+
+// SHA-256 hash of the password — we never store or transmit the
+// plaintext password itself, only this hash, in Firestore.
+async function hashPassword(password: string): Promise<string> {
+  const encoded = new TextEncoder().encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // NAME ENTRY SPLASH PAGE
@@ -191,7 +221,7 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
 // MAIN CHAT APPLICATION
 // ─────────────────────────────────────────────────────────────────────
 function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => void }) {
-  const [groups, setGroups] = useState<FirestoreGroup[]>([]);
+  const [groups, setGroups] = useState<PrivateGroup[]>([]);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [messages, setMessages] = useState<FirestoreMessage[]>([]);
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -208,6 +238,20 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   const [newGroupCategory, setNewGroupCategory] = useState<'sports' | 'mentor' | 'hostel' | 'hackathon'>('sports');
   const [newGroupHostel, setNewGroupHostel] = useState('VIT Outdoor Stadium');
   const [newGroupDesc, setNewGroupDesc] = useState('');
+  const [newGroupIsPrivate, setNewGroupIsPrivate] = useState<boolean>(false);
+  const [newGroupPassword, setNewGroupPassword] = useState('');
+  const [showNewGroupPassword, setShowNewGroupPassword] = useState<boolean>(false);
+  const [newGroupPasswordError, setNewGroupPasswordError] = useState<string | null>(null);
+
+  // Private Lobby Unlock State
+  // Groups the user has already unlocked this session (id set) —
+  // resets on refresh, so re-entering always re-prompts.
+  const [unlockedGroups, setUnlockedGroups] = useState<Set<string>>(new Set());
+  const [passwordPromptGroup, setPasswordPromptGroup] = useState<PrivateGroup | null>(null);
+  const [passwordAttempt, setPasswordAttempt] = useState('');
+  const [showPasswordAttempt, setShowPasswordAttempt] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isVerifyingPassword, setIsVerifyingPassword] = useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -221,12 +265,12 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
     if (isFirebaseConfigured) {
       const q = query(collection(db, 'groups'), orderBy('createdAt', 'desc'));
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetchedGroups: FirestoreGroup[] = [];
+        const fetchedGroups: PrivateGroup[] = [];
         snapshot.forEach((docSnap) => {
-          fetchedGroups.push({ id: docSnap.id, ...docSnap.data() } as FirestoreGroup);
+          fetchedGroups.push({ id: docSnap.id, ...docSnap.data() } as PrivateGroup);
         });
         setGroups(fetchedGroups);
-        if (fetchedGroups.length > 0 && !activeGroupId) {
+        if (fetchedGroups.length > 0 && !activeGroupId && !fetchedGroups[0].isPrivate) {
           setActiveGroupId(fetchedGroups[0].id || null);
         }
       }, (err) => {
@@ -271,6 +315,42 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
 
   const activeGroup = groups.find(g => g.id === activeGroupId) || null;
 
+  // Clicking a lobby in the sidebar routes through here: private lobbies
+  // the user hasn't unlocked this session get a password prompt instead
+  // of opening the chat directly.
+  const openGroup = (group: PrivateGroup) => {
+    if (!group.id) return;
+    if (group.isPrivate && !unlockedGroups.has(group.id)) {
+      setPasswordPromptGroup(group);
+      setPasswordAttempt('');
+      setPasswordError(null);
+      setShowPasswordAttempt(false);
+    } else {
+      setActiveGroupId(group.id);
+    }
+  };
+
+  const handleVerifyPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordPromptGroup?.id) return;
+
+    setIsVerifyingPassword(true);
+    setPasswordError(null);
+
+    const attemptHash = await hashPassword(passwordAttempt);
+
+    if (attemptHash === passwordPromptGroup.passwordHash) {
+      setUnlockedGroups(prev => new Set(prev).add(passwordPromptGroup.id as string));
+      setActiveGroupId(passwordPromptGroup.id);
+      setPasswordPromptGroup(null);
+      setPasswordAttempt('');
+    } else {
+      setPasswordError('Incorrect password — try again');
+    }
+
+    setIsVerifyingPassword(false);
+  };
+
   // Handle Send Message — real messages only, no auto-replies
   const handleSendMessage = async (textToSend?: string) => {
     const text = textToSend || inputText;
@@ -314,6 +394,14 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
     e.preventDefault();
     if (!newGroupName.trim()) return;
 
+    setNewGroupPasswordError(null);
+    if (newGroupIsPrivate) {
+      if (newGroupPassword.trim().length < 4) {
+        setNewGroupPasswordError('Password must be at least 4 characters');
+        return;
+      }
+    }
+
     const emojiMap: Record<string, string> = {
       sports: '⚽',
       mentor: '🎓',
@@ -322,9 +410,11 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
     };
 
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const newGroupData: FirestoreGroup = {
+    const passwordHash = newGroupIsPrivate ? await hashPassword(newGroupPassword.trim()) : undefined;
+
+    const newGroupData: PrivateGroup = {
       name: newGroupName.trim(),
-      avatar: emojiMap[newGroupCategory] || '💬',
+      avatar: newGroupIsPrivate ? '🔒' : (emojiMap[newGroupCategory] || '💬'),
       category: newGroupCategory,
       categoryLabel: newGroupCategory === 'sports' ? 'Sports Match' : newGroupCategory === 'mentor' ? 'Senior Mentor' : newGroupCategory === 'hostel' ? 'Hostel Hangout' : 'Hackathon Squad',
       lastMessage: `${userName} created this lobby`,
@@ -333,8 +423,12 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
       membersCount: 1,
       hostelBlock: newGroupHostel,
       aboutText: newGroupDesc || 'New community group for VIT campus connection.',
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      isPrivate: newGroupIsPrivate,
+      ...(passwordHash ? { passwordHash } : {})
     };
+
+    let newGroupId: string | null = null;
 
     if (isFirebaseConfigured) {
       try {
@@ -345,15 +439,17 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
           timestamp: currentTime,
           createdAt: serverTimestamp()
         });
+        newGroupId = docRef.id;
         setActiveGroupId(docRef.id);
-        triggerToast(`🚀 "${newGroupName}" is now live!`);
+        triggerToast(newGroupIsPrivate ? `🔒 "${newGroupName}" is now live and locked!` : `🚀 "${newGroupName}" is now live!`);
       } catch (err) {
         console.error("Firestore creation error:", err);
       }
     } else {
       const generatedId = 'grp-' + Date.now();
-      const localGroup: FirestoreGroup = { ...newGroupData, id: generatedId };
+      const localGroup: PrivateGroup = { ...newGroupData, id: generatedId };
       setGroups([localGroup, ...groups]);
+      newGroupId = generatedId;
       setActiveGroupId(generatedId);
       setMessages([{
         id: 'welcome-' + Date.now(),
@@ -361,12 +457,21 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
         text: `🎉 ${userName} created "${newGroupName}". Start chatting!`,
         timestamp: currentTime
       }]);
-      triggerToast(`🚀 "${newGroupName}" is now live!`);
+      triggerToast(newGroupIsPrivate ? `🔒 "${newGroupName}" is now live and locked!` : `🚀 "${newGroupName}" is now live!`);
+    }
+
+    // The creator already knows the password they just set — unlock it
+    // for them immediately instead of re-prompting in the same session.
+    if (newGroupId && newGroupIsPrivate) {
+      setUnlockedGroups(prev => new Set(prev).add(newGroupId as string));
     }
 
     setShowNewGroupModal(false);
     setNewGroupName('');
     setNewGroupDesc('');
+    setNewGroupIsPrivate(false);
+    setNewGroupPassword('');
+    setNewGroupPasswordError(null);
   };
 
   const handleResetToZero = () => {
@@ -546,17 +651,23 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
             ) : (
               filteredGroups.map(group => {
                 const isActive = group.id === activeGroupId;
+                const isLocked = !!group.isPrivate && !(group.id && unlockedGroups.has(group.id));
                 return (
                   <motion.div
                     key={group.id}
-                    onClick={() => setActiveGroupId(group.id || null)}
+                    onClick={() => openGroup(group)}
                     whileHover={{ backgroundColor: 'rgba(30, 64, 84, 0.5)' }}
                     className={`px-4 py-3 flex items-start gap-3 cursor-pointer transition-all ${
                       isActive ? 'bg-slate-800/70 border-l-4 border-cyan-500' : ''
                     }`}
                   >
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-xl shadow-xs shrink-0">
+                    <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center text-xl shadow-xs shrink-0">
                       {group.avatar}
+                      {group.isPrivate && (
+                        <span className="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-slate-950 border border-slate-700 flex items-center justify-center">
+                          <Lock className="w-2.5 h-2.5 text-cyan-400" />
+                        </span>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
@@ -567,8 +678,8 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                           {group.lastMessageTime}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 truncate pr-2">
-                        {group.lastMessage}
+                      <p className={`text-[11px] truncate pr-2 ${isLocked ? 'text-slate-500 italic' : 'text-slate-400'}`}>
+                        {isLocked ? '🔒 Locked — enter password to view' : group.lastMessage}
                       </p>
                       <div className="mt-1 flex items-center gap-1.5">
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
@@ -824,6 +935,11 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                 </div>
                 <h4 className="text-base font-bold text-slate-100">{activeGroup.name}</h4>
                 <p className="text-xs text-cyan-400 font-bold mt-0.5">{activeGroup.categoryLabel}</p>
+                {activeGroup.isPrivate && (
+                  <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full bg-cyan-950/50 border border-cyan-800/60 text-cyan-300 text-[10px] font-bold uppercase tracking-wider">
+                    <Lock className="w-3 h-3" /> Private Lobby
+                  </span>
+                )}
                 {activeGroup.hostelBlock && (
                   <p className="text-[11px] text-slate-400 mt-1">📍 {activeGroup.hostelBlock}</p>
                 )}
@@ -909,7 +1025,12 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               className="w-full max-w-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative"
             >
               <button
-                onClick={() => setShowNewGroupModal(false)}
+                onClick={() => {
+                  setShowNewGroupModal(false);
+                  setNewGroupIsPrivate(false);
+                  setNewGroupPassword('');
+                  setNewGroupPasswordError(null);
+                }}
                 className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-800 text-slate-500 hover:text-slate-200 cursor-pointer"
               >
                 ✕
@@ -975,14 +1096,177 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                   />
                 </div>
 
+                {/* Private lobby toggle + password */}
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/40 p-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewGroupIsPrivate(!newGroupIsPrivate);
+                      setNewGroupPasswordError(null);
+                    }}
+                    className="w-full flex items-center justify-between cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2 text-xs font-semibold text-slate-200">
+                      {newGroupIsPrivate ? (
+                        <Lock className="w-4 h-4 text-cyan-400" />
+                      ) : (
+                        <Unlock className="w-4 h-4 text-slate-500" />
+                      )}
+                      Make this lobby private
+                    </span>
+                    <span
+                      className={`relative w-10 h-5 rounded-full transition-all shrink-0 ${
+                        newGroupIsPrivate ? 'bg-gradient-to-r from-cyan-500 to-blue-600' : 'bg-slate-700'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${
+                          newGroupIsPrivate ? 'left-5' : 'left-0.5'
+                        }`}
+                      />
+                    </span>
+                  </button>
+
+                  <AnimatePresence>
+                    {newGroupIsPrivate && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-3 mt-3 border-t border-slate-700/60">
+                          <label className="text-xs font-semibold text-slate-300 block mb-1">Lobby Password:</label>
+                          <div className="relative">
+                            <input
+                              type={showNewGroupPassword ? 'text' : 'password'}
+                              value={newGroupPassword}
+                              onChange={(e) => {
+                                setNewGroupPassword(e.target.value);
+                                setNewGroupPasswordError(null);
+                              }}
+                              placeholder="Set a password to lock this lobby"
+                              className="w-full rounded-xl bg-slate-900/60 border border-slate-700 p-3 pr-10 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 focus:bg-slate-900"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewGroupPassword(!showNewGroupPassword)}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
+                            >
+                              {showNewGroupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                            Anyone who wants into this lobby will need this password. Only members who enter it correctly can view or send messages.
+                          </p>
+                          {newGroupPasswordError && (
+                            <p className="text-[11px] text-rose-400 mt-1.5 flex items-center gap-1">
+                              <ShieldAlert className="w-3 h-3" /> {newGroupPasswordError}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
                 <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800 mt-6">
-                  <button type="button" onClick={() => setShowNewGroupModal(false)} className="px-5 py-2.5 rounded-xl bg-slate-800 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer">
+                  <button type="button" onClick={() => {
+                    setShowNewGroupModal(false);
+                    setNewGroupIsPrivate(false);
+                    setNewGroupPassword('');
+                    setNewGroupPasswordError(null);
+                  }} className="px-5 py-2.5 rounded-xl bg-slate-800 text-xs font-semibold text-slate-300 hover:bg-slate-700 cursor-pointer">
                     Cancel
                   </button>
                   <button type="submit" className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-700 text-xs font-bold text-white shadow-md shadow-blue-900/40 cursor-pointer hover:shadow-lg">
                     Create Lobby
                   </button>
                 </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════════════════════════════════════ */}
+      {/* MODAL: PRIVATE LOBBY PASSWORD PROMPT */}
+      {/* ═══════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {passwordPromptGroup && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="w-full max-w-sm bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl relative"
+            >
+              <button
+                onClick={() => {
+                  setPasswordPromptGroup(null);
+                  setPasswordAttempt('');
+                  setPasswordError(null);
+                }}
+                className="absolute top-6 right-6 p-2 rounded-xl hover:bg-slate-800 text-slate-500 hover:text-slate-200 cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-cyan-600 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-900/40 mb-4">
+                  <Lock className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-100">{passwordPromptGroup.name}</h3>
+                <p className="text-xs text-slate-400 mt-1">This is a private lobby. Enter the password to view its chats.</p>
+              </div>
+
+              <form onSubmit={handleVerifyPassword} className="space-y-4">
+                <div>
+                  <div className="relative">
+                    <input
+                      autoFocus
+                      type={showPasswordAttempt ? 'text' : 'password'}
+                      value={passwordAttempt}
+                      onChange={(e) => {
+                        setPasswordAttempt(e.target.value);
+                        setPasswordError(null);
+                      }}
+                      placeholder="Enter lobby password"
+                      className={`w-full rounded-xl bg-slate-800/60 border p-3 pr-10 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:bg-slate-800 transition-all ${
+                        passwordError ? 'border-rose-700 focus:border-rose-500' : 'border-slate-700 focus:border-cyan-500'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswordAttempt(!showPasswordAttempt)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
+                    >
+                      {showPasswordAttempt ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {passwordError && (
+                    <p className="text-[11px] text-rose-400 mt-1.5 flex items-center gap-1">
+                      <ShieldAlert className="w-3 h-3" /> {passwordError}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isVerifyingPassword || !passwordAttempt.trim()}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-bold shadow-md shadow-blue-900/40 hover:shadow-lg transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isVerifyingPassword ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    />
+                  ) : (
+                    <Unlock className="w-4 h-4" />
+                  )}
+                  <span>{isVerifyingPassword ? 'Checking...' : 'Unlock Lobby'}</span>
+                </button>
               </form>
             </motion.div>
           </div>
