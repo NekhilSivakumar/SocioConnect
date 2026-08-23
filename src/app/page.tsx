@@ -74,28 +74,59 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
   };
 
   return (
-    <div className="app-font h-[100dvh] w-full flex items-center justify-center bg-black relative overflow-hidden px-4">
+    <div className="app-font h-[100dvh] w-full flex items-center justify-center bg-gradient-to-br from-black via-blue-950 to-neutral-950 relative overflow-hidden px-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-white/5 blur-[80px]" />
-        <div className="absolute -bottom-40 -right-40 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full bg-white/5 blur-[100px]" />
+        <motion.div
+          animate={{ x: [0, 25, -15, 0], y: [0, -30, 15, 0], scale: [1, 1.08, 0.95, 1] }}
+          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-32 -left-32 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-blue-600/10 blur-[90px]"
+        />
+        <motion.div
+          animate={{ x: [0, -20, 25, 0], y: [0, 25, -20, 0], scale: [1, 0.92, 1.06, 1] }}
+          transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -bottom-40 -right-40 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full bg-blue-500/10 blur-[110px]"
+        />
+        <motion.div
+          animate={{ x: [0, 12, -12, 0], y: [0, -15, 20, 0] }}
+          transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full bg-white/[0.03] blur-[70px]"
+        />
       </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 22 }}
         className="relative z-10 w-full max-w-sm"
       >
-        <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-white flex items-center justify-center shadow-xl">
-            <MessageSquare className="w-8 h-8 text-black" />
-          </div>
+        <div className="bg-white/[0.04] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl">
+          <motion.div
+            initial={{ scale: 0, rotate: -8 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 16, delay: 0.15 }}
+            className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-700 flex items-center justify-center shadow-xl shadow-blue-900/50"
+          >
+            <MessageSquare className="w-8 h-8 text-white" />
+          </motion.div>
 
-          <h1 className="text-2xl font-black text-white text-center tracking-tight mb-1">SocioConnect</h1>
-          <p className="text-xs text-white/50 text-center mb-8 font-medium">Connect with VITians instantly</p>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <h1 className="text-2xl font-black text-white text-center tracking-tight mb-1">SocioConnect</h1>
+            <p className="text-xs text-blue-200/50 text-center mb-8 font-medium">Connect with VITians instantly</p>
+          </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <motion.form
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            onSubmit={handleSubmit}
+            className="space-y-4"
+          >
             <div className="relative">
-              <User className="w-4 h-4 text-white/40 absolute left-4 top-1/2 -translate-y-1/2" />
+              <User className="w-4 h-4 text-blue-200/40 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 ref={inputRef}
                 type="text"
@@ -103,18 +134,43 @@ function NameEntryPage({ onEnter }: { onEnter: (name: string) => void }) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Name"
                 maxLength={20}
-                className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-all"
+                className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-blue-400/40 focus:bg-white/[0.07] transition-all"
               />
             </div>
 
             <button
               disabled={name.trim().length < 2}
-              className="w-full py-3.5 rounded-2xl bg-white text-black font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-95"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-950/50 disabled:opacity-40 disabled:shadow-none transition-all active:scale-95"
             >
               Get Started <ArrowRight className="w-4 h-4" />
             </button>
-          </form>
+          </motion.form>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-7 flex flex-wrap justify-center gap-2"
+          >
+            {['⚽ Sports', '🎓 Mentors', '🏢 Hostels', '🚀 Hackathons'].map((tag, i) => (
+              <span
+                key={i}
+                className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-blue-100/60"
+              >
+                {tag}
+              </span>
+            ))}
+          </motion.div>
         </div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="text-center text-[11px] text-blue-200/30 mt-5"
+        >
+          VIT Campus • Built for freshers & seniors
+        </motion.p>
       </motion.div>
     </div>
   );
@@ -142,6 +198,8 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   const [unlockedGroups, setUnlockedGroups] = useState<Set<string>>(new Set());
   const [passwordPromptGroup, setPasswordPromptGroup] = useState<PrivateGroup | null>(null);
   const [passwordAttempt, setPasswordAttempt] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [isDeletingGroup, setIsDeletingGroup] = useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -174,7 +232,35 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    setShowDeleteConfirm(false);
+    setShowInfoSidebar(false);
+  }, [activeGroupId]);
+
   const activeGroup = groups.find(g => g.id === activeGroupId) || null;
+
+  // Permanently delete a group — pushes the removal to Firestore
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
+    setIsDeletingGroup(true);
+    try {
+      const messagesRef = collection(db, 'groups', groupId, 'messages');
+      const messagesSnap = await getDocs(messagesRef);
+      await Promise.all(messagesSnap.docs.map((msgDoc) => deleteDoc(msgDoc.ref)));
+      await deleteDoc(doc(db, 'groups', groupId));
+      triggerToast(`🗑️ "${groupName}" deleted`);
+      if (activeGroupId === groupId) {
+        setActiveGroupId(null);
+        setMessages([]);
+      }
+      setShowInfoSidebar(false);
+      setShowDeleteConfirm(false);
+    } catch (err) {
+      console.error("Error deleting group:", err);
+      triggerToast(`⚠️ Couldn't delete "${groupName}" — try again`);
+    } finally {
+      setIsDeletingGroup(false);
+    }
+  };
 
   const handleSendMessage = async (textOverride?: string) => {
     const text = textOverride || inputText;
@@ -203,13 +289,27 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   };
 
   return (
-    <div className="app-font h-[100dvh] w-full bg-black text-white flex flex-col overflow-hidden">
-      
+    <div className="app-font h-[100dvh] w-full bg-gradient-to-br from-black via-blue-950 to-neutral-950 text-white flex flex-col overflow-hidden">
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[70] bg-neutral-900 border border-neutral-800 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-xl"
+          >
+            {toastMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Container - No margins on mobile for full-screen feel */}
-      <div className="flex-1 flex overflow-hidden sm:m-2 md:m-3 sm:rounded-3xl bg-neutral-950 border-neutral-800 sm:border relative">
+      <div className="flex-1 flex overflow-hidden sm:m-2 md:m-3 sm:rounded-3xl bg-neutral-950/70 border-neutral-800 sm:border relative">
         
         {/* LEFT SIDEBAR - Responsive Toggle */}
-        <aside className={`${activeGroupId ? 'hidden' : 'flex'} md:flex w-full md:w-[350px] lg:w-[400px] flex-col border-r border-neutral-900 bg-black`}>
+        <aside className={`${activeGroupId ? 'hidden' : 'flex'} md:flex w-full md:w-[350px] lg:w-[400px] flex-col border-r border-neutral-900 bg-transparent`}>
           
           <div className="p-4 flex items-center justify-between border-b border-neutral-900">
             <div className="flex items-center gap-3">
@@ -273,7 +373,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
         </aside>
 
         {/* MAIN CHAT AREA */}
-        <section className={`${activeGroupId ? 'flex' : 'hidden'} md:flex flex-1 flex-col bg-black relative`}>
+        <section className={`${activeGroupId ? 'flex' : 'hidden'} md:flex flex-1 flex-col bg-transparent relative`}>
           {activeGroup ? (
             <>
               {/* Chat Header */}
@@ -319,7 +419,7 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
               </div>
 
               {/* Chat Input - Optimized for Mobile Typing */}
-              <footer className="p-3 pb-safe border-t border-neutral-900 bg-black">
+              <footer className="p-3 pb-safe border-t border-neutral-900 bg-transparent">
                 <div className="flex items-center gap-2 max-w-full">
                   <div className="flex-1 relative flex items-center">
                     <input
@@ -348,6 +448,92 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
             </div>
           )}
         </section>
+
+        {/* INFO PANEL — full-screen overlay on mobile, side panel on desktop */}
+        <AnimatePresence>
+          {showInfoSidebar && activeGroup && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowInfoSidebar(false)}
+                className="fixed inset-0 z-30 bg-black/70 md:hidden"
+              />
+              <motion.aside
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+                className="fixed inset-y-0 right-0 z-40 w-full sm:w-[340px] md:static md:z-auto md:w-[320px] h-full border-l border-neutral-900 bg-neutral-950/80 flex flex-col overflow-y-auto shrink-0"
+              >
+                <div className="h-16 px-4 border-b border-neutral-900 flex items-center justify-between shrink-0">
+                  <h3 className="text-sm font-bold">Lobby Info</h3>
+                  <button onClick={() => setShowInfoSidebar(false)} className="p-2 rounded-full hover:bg-neutral-900 text-neutral-400">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="p-6 text-center border-b border-neutral-900">
+                  <div className="w-20 h-20 rounded-3xl bg-neutral-900 mx-auto flex items-center justify-center text-4xl mb-3">
+                    {activeGroup.avatar}
+                  </div>
+                  <h4 className="text-base font-bold">{activeGroup.name}</h4>
+                  <p className="text-xs text-neutral-400 mt-1 capitalize">{activeGroup.category}</p>
+                  {activeGroup.isPrivate && (
+                    <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-300 text-[10px] font-bold uppercase tracking-wider">
+                      <Lock size={10} /> Private Lobby
+                    </span>
+                  )}
+                </div>
+
+                <div className="p-5 flex-1">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2">Danger Zone</h5>
+                  {!showDeleteConfirm ? (
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-red-950/40 border border-red-900/60 text-red-400 text-xs font-bold active:scale-95 transition-transform"
+                    >
+                      <Trash2 size={14} />
+                      <span>Delete this lobby</span>
+                    </button>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-red-950/30 border border-red-900/60 space-y-3">
+                      <p className="text-[11px] text-red-300 leading-relaxed">
+                        This permanently deletes <span className="font-bold">"{activeGroup.name}"</span> and every message in it. This can't be undone.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          disabled={isDeletingGroup}
+                          className="flex-1 px-3 py-2.5 rounded-xl bg-neutral-900 text-neutral-300 text-[11px] font-bold disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => activeGroup.id && handleDeleteGroup(activeGroup.id, activeGroup.name)}
+                          disabled={isDeletingGroup}
+                          className="flex-1 px-3 py-2.5 rounded-xl bg-red-600 text-white text-[11px] font-bold disabled:opacity-50 flex items-center justify-center gap-1.5"
+                        >
+                          {isDeletingGroup ? (
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                              className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full"
+                            />
+                          ) : (
+                            <Trash2 size={12} />
+                          )}
+                          <span>{isDeletingGroup ? 'Deleting...' : 'Confirm Delete'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* MODALS (Simplified for responsiveness) */}
@@ -498,7 +684,7 @@ export default function SocioConnectApp() {
     setUserName(name);
   };
 
-  if (isLoading) return <div className="h-[100dvh] w-full bg-black" />;
+  if (isLoading) return <div className="h-[100dvh] w-full bg-gradient-to-br from-black via-blue-950 to-neutral-950" />;
   
   return !userName ? (
     <NameEntryPage onEnter={handleEnterName} />
