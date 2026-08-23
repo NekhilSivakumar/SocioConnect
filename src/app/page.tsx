@@ -38,7 +38,8 @@ import {
   serverTimestamp,
   doc,
   setDoc,
-  deleteDoc
+  deleteDoc,
+  getDocs
 } from 'firebase/firestore';
 
 // ─────────────────────────────────────────────────────────────────────
@@ -199,6 +200,8 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   const [showInfoSidebar, setShowInfoSidebar] = useState<boolean>(false);
   const [showNewGroupModal, setShowNewGroupModal] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [isDeletingGroup, setIsDeletingGroup] = useState<boolean>(false);
 
   // New Group Form State
   const [newGroupName, setNewGroupName] = useState('');
@@ -260,6 +263,11 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Reset any pending delete confirmation when switching groups
+  useEffect(() => {
+    setShowDeleteConfirm(false);
+  }, [activeGroupId]);
 
   const activeGroup = groups.find(g => g.id === activeGroupId) || null;
 
@@ -366,6 +374,44 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
     setActiveGroupId(null);
     setMessages([]);
     triggerToast('🧹 All groups and chats reset to zero!');
+  };
+
+  // Permanently delete a single group — pushes the removal to Firestore
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
+    setIsDeletingGroup(true);
+
+    if (isFirebaseConfigured) {
+      try {
+        // Firestore doesn't cascade-delete subcollections, so clear the
+        // group's messages first, then remove the group document itself.
+        const messagesRef = collection(db, 'groups', groupId, 'messages');
+        const messagesSnap = await getDocs(messagesRef);
+        await Promise.all(messagesSnap.docs.map((msgDoc) => deleteDoc(msgDoc.ref)));
+        await deleteDoc(doc(db, 'groups', groupId));
+        triggerToast(`🗑️ "${groupName}" permanently deleted`);
+      } catch (err) {
+        console.error("Error deleting group from Firestore:", err);
+        triggerToast(`⚠️ Couldn't delete "${groupName}" — try again`);
+        setIsDeletingGroup(false);
+        return;
+      }
+    } else {
+      setGroups(prev => prev.filter(g => g.id !== groupId));
+      triggerToast(`🗑️ "${groupName}" deleted`);
+    }
+
+    // Local UI cleanup happens regardless of persistence path —
+    // for Firestore-backed groups the onSnapshot listener will also
+    // sync this once the delete propagates, but we clear it immediately
+    // for a responsive feel.
+    if (activeGroupId === groupId) {
+      setActiveGroupId(null);
+      setMessages([]);
+    }
+    setGroups(prev => prev.filter(g => g.id !== groupId));
+    setShowInfoSidebar(false);
+    setShowDeleteConfirm(false);
+    setIsDeletingGroup(false);
   };
 
   const filteredGroups = groups.filter(g => {
@@ -797,6 +843,52 @@ function ChatApp({ userName, onLogout }: { userName: string; onLogout: () => voi
                     <MapPin className="w-4 h-4 shrink-0 text-cyan-400" />
                     <span>VIT Vellore Main Campus</span>
                   </div>
+                </div>
+
+                {/* Danger Zone — permanent delete, pushed straight to Firestore */}
+                <div className="pt-2 border-t border-slate-800">
+                  <h5 className="text-[10px] font-bold uppercase tracking-wider text-rose-500/80 mb-2">Danger Zone</h5>
+
+                  {!showDeleteConfirm ? (
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-950/40 border border-rose-900/60 text-rose-400 text-xs font-semibold hover:bg-rose-950/70 hover:text-rose-300 transition-all cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete this lobby</span>
+                    </button>
+                  ) : (
+                    <div className="p-3 rounded-2xl bg-rose-950/30 border border-rose-900/60 space-y-3">
+                      <p className="text-[11px] text-rose-300 leading-relaxed">
+                        This permanently deletes <span className="font-bold">"{activeGroup.name}"</span> and every message in it from the database. This can't be undone.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          disabled={isDeletingGroup}
+                          className="flex-1 px-3 py-2 rounded-xl bg-slate-800 text-slate-300 text-[11px] font-semibold hover:bg-slate-700 transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => activeGroup.id && handleDeleteGroup(activeGroup.id, activeGroup.name)}
+                          disabled={isDeletingGroup}
+                          className="flex-1 px-3 py-2 rounded-xl bg-rose-600 text-white text-[11px] font-bold hover:bg-rose-500 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                        >
+                          {isDeletingGroup ? (
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                              className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full"
+                            />
+                          ) : (
+                            <Trash2 className="w-3 h-3" />
+                          )}
+                          <span>{isDeletingGroup ? 'Deleting...' : 'Confirm Delete'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.aside>
