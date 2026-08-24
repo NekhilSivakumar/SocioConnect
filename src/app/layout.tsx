@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SocioConnect | VIT Campus Fresher-Senior Network & Academic Vault",
-  description: "Interactive platform for VIT freshers to connect with seniors, find sports buddies, hostel peers, and access curated course catalogs for Calculus, Physics, and Chemistry.",
+  title: "SocioConnect",
+  description: "Connect Together",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
